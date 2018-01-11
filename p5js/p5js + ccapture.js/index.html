@@ -1,0 +1,87 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<style>
+    /* canvas{
+        width: 640px;
+        height: 640px;
+    } */
+</style>
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script>
+
+    let angle = 0;
+    let w = 36;
+    let ma;
+    let maxD;
+    var camera_distance = 1280;
+    var canvas;
+    var time_f = 1;
+
+    function setup() {
+        createCanvas(1080, 1080, WEBGL);
+        ma = atan(cos(QUARTER_PI));
+        maxD = dist(0, 0, 1080, 1080);
+        setAttributes('antialias', true);
+        canvas = document.getElementById('defaultCanvas0');
+        ortho(-camera_distance, camera_distance, camera_distance, -camera_distance, -2000, 2000);
+        normalMaterial();
+
+        setTimeout(startCapture, 14750);
+    }
+
+    var signal = 1;
+    var count = 0;
+    var looped = false;
+    function draw() {
+        background('#00fdeb');
+        rotateX(-ma);
+        rotateY(-QUARTER_PI)
+        // console.log('1');
+
+        for (let z = 0; z < height; z += w) {
+            for (let x = 0; x < width * 2; x += w) {
+                let d = dist(x, z, width / 2, height / 2);
+                push();
+
+                let offset = map(d, 0, maxD, -PI, PI);
+                let a = angle + offset;
+                let h = map(sin(a), -1, 1, -150, 110);
+                translate(x - width, h, z - height / 2);
+                var size = (w / (x)) * 342;
+                if (size > w) {
+                    size = w;
+                }
+
+                sphere(size);
+
+                pop();
+            }
+            rotateZ(((angle / PI) / 100));
+        }
+
+        angle -= (PI * signal) / time_f;
+    }
+
+    var capturer = new CCapture({
+        format: 'webm',
+        framerate: 30,
+        // workersPath: 'node_modules/ccapture.js/src/',
+        // verbose: true,
+        motionBlurFrames: 3
+    });
+
+    function startCapture() {
+        time_f = 96;
+        capturer.start();
+        render();
+        setTimeout(function () {
+            capturer.stop();
+            capturer.save();
+        }, 15000);
+    }
+
+    function render() {
+        capturer.capture(canvas);
+        requestAnimationFrame(render);
+    }
+</script>
