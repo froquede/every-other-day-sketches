@@ -1,4 +1,4 @@
 # daily-sketches
 canvas / webgl / p5.js daily? sketches
 
-<img src="https://i.giphy.com/media/xUNd9QweqcShHh7mwM/giphy.webp"/>
+<img src="https://thumbs.gfycat.com/WetNeedyAssassinbug-size_restricted.gif"/>
