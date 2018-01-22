@@ -1,0 +1,283 @@
+<head>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+</head>
+
+<body>
+    <canvas width=339 height=339></canvas>
+</body>
+<script>
+    var format_goes_url = 'YYYYMDDHHMM'
+    var size = 339;
+    var goes_url = 'https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/{{date}}_GOES16-ABI-FD-GEOCOLOR-' + size + 'x' + size + '.jpg';
+    var now = moment().subtract(1, 'hours').set('minute', 0);
+    console.log(now);
+    var dates = [];
+    var urls = [];
+    var images = [];
+    dates.push(to_GOES_DATE(now));
+
+    var canvas;
+
+    generateAllHours(now.clone(), 15, 'minutes');
+
+    function generateAllHours(date, interval, type_interval) {
+        date = date.subtract(interval, type_interval);
+        dates.push(to_GOES_DATE(date));
+
+        if (!canvas) {
+            canvas = $('canvas')[0];
+        }
+        global_context = canvas.getContext('2d');
+
+        if (date.isAfter(now.clone().set('hour', 0).set('minute', 15).set('second', 0).set('millisecond', 0)) === true) {
+            generateAllHours(date, interval, type_interval);
+        }
+        else {
+            dates.reverse();
+            generateUrls(0);
+        }
+    }
+
+    function generateUrls(d) {
+        var date = dates[d];
+        var url = goes_url.replace('{{date}}', date);
+        $.get(url, function (res) {
+            urls.push(url);
+            d++;
+            if (d < dates.length) {
+                generateUrls(d);
+            }
+            else {
+                savePixelData(0);
+            }
+        }).fail(function () {
+            d++;
+            if (d < dates.length) {
+                generateUrls(d);
+            }
+            else {
+                savePixelData(0);
+            }
+        });
+    }
+
+    function savePixelData(u) {
+        var url = urls[u];
+        getPixels(url, u);
+    }
+
+    function to_GOES_DATE(date) {
+        var year = '' + date.get('year');
+        var month = '' + date.get('month');
+        var day = '' + date.get('date');
+        var hour = ('0' + date.get('hour')).slice(-2);
+        var minute = date.get('minute');
+        if (minute % 15 > 0 && minute >= 15) {
+            date.add(minute % 15, 'minutes');
+        }
+        else {
+            if (minute < 15) {
+                date.subtract(minute, 'minutes');
+            }
+        }
+
+        minute = ('0' + date.get('minute')).slice(-2);
+
+        return year + month + day + hour + minute;
+    }
+
+    var interpolated_image_base, interpolated_next_image, interpolation_frame;
+    function checkPixels(context, img, u) {
+        images.push({ url: urls[u], pixels: context.getImageData(0, 0, img.width, img.height).data });
+        u++;
+
+        if (u < urls.length) {
+            savePixelData(u);
+        }
+        else {
+            interpolated_image_base = images[0].pixels;
+            interpolated_next_image = images[1].pixels;
+            interpolation_frame = 0;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            genareteAllInterpolations(1);
+        }
+    }
+
+    function getPixels(url, u) {
+        var img = new Image();
+        img.src = url;
+        img.crossOrigin = "Anonymous";
+        var context = canvas.getContext('2d');
+
+        if (img.complete) {
+            context.drawImage(img, 0, 0);
+            setTimeout(function () {
+                checkPixels(context, img, u);
+            }, 0);
+        } else {
+            img.onload = function () {
+                context.drawImage(img, 0, 0);
+                setTimeout(function () {
+                    checkPixels(context, img, u);
+                }, 0);
+            };
+        }
+    }
+
+    function chunk(arr, len) {
+        var chunks = [],
+            i = 0,
+            n = arr.length;
+
+        while (i < n) {
+            chunks.push(Array.prototype.slice.call(arr.slice(i, i += len)));
+        }
+
+        return chunks;
+    }
+
+    function draw_pixels(pixels, context) {
+        if (pixels) {
+            var imageData = global_context.createImageData(size, size);
+            imageData.data.set(pixels);
+            // global_context.putImageData(imageData, 0, 0);
+            global_context.putImageData(imageData, 0, 0, 0, 0, size, size);
+            // ctx, imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight
+        }
+    }
+
+    function generateInterpolation(a, b, frames) {
+        // console.log(a);
+        // for (i = 3; i < a.length; i += 3) {
+        //     var sin_b = Math.sin(b[i - 3] + b[i - 2] + b[i - 1] + b[i]);
+        //     a[i] = a[i] * sin_b;
+        // }
+        // frames.push(a);
+
+        for (var mx = 0; mx < max_interpolation; mx++) {
+            var frame = [];
+            for (var i = 3; i < ((size * size) * 4); i += 4) {
+                var pixel_a = a;
+                var pixel_b = b;
+                // var diff = {};
+
+                // if (pixel_a[0] > pixel_b[0]) {
+                //     diff.r = pixel_a[0] - pixel_b[0];
+                // }
+                // else {
+                //     diff.r = pixel_b[0] - pixel_a[0];
+                // }
+
+                // if (pixel_a[1] > pixel_b[1]) {
+                //     diff.g = pixel_a[1] - pixel_b[1];
+                // }
+                // else {
+                //     diff.g = pixel_b[1] - pixel_a[1];
+                // }
+
+                // if (pixel_a[2] > pixel_b[2]) {
+                //     diff.b = pixel_a[2] - pixel_b[2];
+                // }
+                // else {
+                //     diff.b = pixel_b[2] - pixel_a[2];
+                // }
+
+                // if (pixel_a[3] > pixel_b[3]) {
+                //     diff.a = pixel_a[3] - pixel_b[3];
+                // }
+                // else {
+                //     diff.a = pixel_b[3] - pixel_a[3];
+                // }
+
+                // diff.r = (diff.r * mx);
+                // diff.g = (diff.g * mx);
+                // diff.b = (diff.b * mx);
+                // diff.a = (diff.a * mx);
+
+
+                var this_pixel = [
+                    parseInt(pixel_a[i - 3]),
+                    parseInt(pixel_a[i - 2]),
+                    parseInt(pixel_a[i - 1]),
+                    parseInt(pixel_a[i]),
+                ];
+
+                var this_b_pixel = [
+                    parseInt(pixel_b[i - 3]),
+                    parseInt(pixel_b[i - 2]),
+                    parseInt(pixel_b[i - 1]),
+                    parseInt(pixel_b[i]),
+                ];
+
+                var sin_b = (this_pixel[0] + this_b_pixel[0]) / mx +
+                    (this_pixel[1] + this_b_pixel[1]) / mx +
+                    (this_pixel[2] + this_b_pixel[2]) / mx;
+
+                // console.log(sin_b, pixel_a[3]);
+                frame.push(this_pixel[0] + (this_pixel[0] + this_b_pixel[0]) / i);
+                frame.push(this_pixel[1] + (this_pixel[1] + this_b_pixel[1]) / i);
+                frame.push(this_pixel[2] + (this_pixel[2] + this_b_pixel[2]) / i);
+                frame.push(this_pixel[3]);
+            }
+
+            // console.log(frame.length);
+            frames.push(frame);
+        }
+    }
+
+    var frame_a = 0;
+    var frame_b = 1;
+
+    var max_interpolation = 5;
+    var interpolation_frames = [];
+    var generating = false;
+    var global_context;
+    function genareteAllInterpolations(x) {
+        // interpolation_frames.push(images[x - 1].pixels);
+        generateInterpolation(images[x - 1].pixels, images[x].pixels, interpolation_frames);
+        x++;
+        console.log(((x / images.length) * 100).toFixed(2) + '%');
+        if (x < images.length) {
+            genareteAllInterpolations(x);
+        }
+        else {
+            console.log('finish');
+            startCapture();
+            window.requestAnimationFrame(drawFrames);
+        }
+    }
+
+    var frame = 0;
+    function drawFrames() {
+        if (interpolation_frames[frame]) {
+            draw_pixels(interpolation_frames[frame], global_context);
+            frame++;
+        }
+        else {
+            frame = 0;
+            capturer.stop();
+            capturer.save();
+        }
+
+        window.requestAnimationFrame(drawFrames);
+    }
+
+    var capturer = new CCapture({
+        format: 'gif',
+        framerate: 30,
+        workersPath: 'node_modules/ccapture.js/src/',
+        // verbose: true,
+        motionBlurFrames: 3
+    });
+
+    function startCapture() {
+        capturer.start();
+        render();
+    }
+    function render() {
+        capturer.capture(canvas);
+        requestAnimationFrame(render);
+    }
+</script>

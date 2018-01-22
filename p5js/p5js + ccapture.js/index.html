@@ -5,6 +5,7 @@
         height: 640px;
     } */
 </style>
+
 <body></body>
 <script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
 <script>
@@ -25,6 +26,11 @@
         canvas = document.getElementById('defaultCanvas0');
         ortho(-camera_distance, camera_distance, camera_distance, -camera_distance, -2000, 2000);
         normalMaterial();
+
+
+        beginShape();
+        vertex(20, 20);
+        endShape(CLOSE);
 
         setTimeout(startCapture, 14750);
     }
@@ -51,8 +57,6 @@
                 if (size > w) {
                     size = w;
                 }
-
-                sphere(size);
 
                 pop();
             }
