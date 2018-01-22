@@ -8,6 +8,6 @@ p5.js + webgl + ccapture.js
 
 </br></br>
 
-<img src="https://user-images.githubusercontent.com/8432403/35236566-ebe60f56-ff8e-11e7-9c05-8a7895ff9c0b.gif" width="250" height="250"/>
+<img src="https://user-images.githubusercontent.com/8432403/35236567-ec1e8854-ff8e-11e7-861b-5371487b4100.gif" width="250" height="250"/>
 canvas + GOES imagery + ccapture.js
 </br>
