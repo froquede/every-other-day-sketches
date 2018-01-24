@@ -11,28 +11,23 @@
 <script>
 
     let angle = 0;
-    let w = 36;
+    let w = 10;
     let ma;
     let maxD;
-    var camera_distance = 1280;
+    var camera_distance = 540;
     var canvas;
     var time_f = 1;
 
     function setup() {
-        createCanvas(1080, 1080, WEBGL);
+        createCanvas(320, 320, WEBGL);
         ma = atan(cos(QUARTER_PI));
-        maxD = dist(0, 0, 1080, 1080);
+        maxD = dist(0, 0, 320, 320);
         setAttributes('antialias', true);
         canvas = document.getElementById('defaultCanvas0');
-        ortho(-camera_distance, camera_distance, camera_distance, -camera_distance, -2000, 2000);
+        ortho(-camera_distance, camera_distance, camera_distance, -camera_distance, -1000, 1000);
         normalMaterial();
 
-
-        beginShape();
-        vertex(20, 20);
-        endShape(CLOSE);
-
-        setTimeout(startCapture, 14750);
+        setTimeout(startCapture, 7375 * 2);
     }
 
     var signal = 1;
@@ -58,6 +53,8 @@
                     size = w;
                 }
 
+                sphere(size);
+
                 pop();
             }
             rotateZ(((angle / PI) / 100));
@@ -66,26 +63,34 @@
         angle -= (PI * signal) / time_f;
     }
 
+    var framerate = 30;
+    var motion_blur = 3;
     var capturer = new CCapture({
-        format: 'webm',
-        framerate: 30,
-        // workersPath: 'node_modules/ccapture.js/src/',
+        format: 'gif',
+        framerate: framerate,
+        workersPath: 'node_modules/ccapture.js/src/',
         // verbose: true,
-        motionBlurFrames: 3
+        motionBlurFrames: motion_blur
     });
 
+    var time_stop = 10000;
+    var total = (time_stop / 1000) * (framerate * motion_blur);
+    var rendered_count = 0;
     function startCapture() {
-        time_f = 96;
+        rendered_count = 0;
+        time_f = 66;
         capturer.start();
         render();
         setTimeout(function () {
             capturer.stop();
             capturer.save();
-        }, 15000);
+        }, time_stop);
     }
 
     function render() {
         capturer.capture(canvas);
+        rendered_count++;
+        console.log('Render process: ' + ((rendered_count / total) * 100).toFixed(2) + '%');
         requestAnimationFrame(render);
     }
 </script>
