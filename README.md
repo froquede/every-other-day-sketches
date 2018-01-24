@@ -5,6 +5,6 @@ canvas / webgl / p5.js daily? sketches
 </br>
 
 <p>
-  <img align="left" src="https://thumbs.gfycat.com/WetNeedyAssassinbug-size_restricted.gif"/>
+  <img align="left" src="https://user-images.githubusercontent.com/8432403/35356327-3716b990-0137-11e8-9c92-6d7f6b368146.gif" width="250" height="250"/>
   <img align="center" src="https://user-images.githubusercontent.com/8432403/35236567-ec1e8854-ff8e-11e7-861b-5371487b4100.gif" width="250" height="250"/>
 </p>
