@@ -1,0 +1,137 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<style>
+    /* canvas{
+        width: 640px;
+        height: 640px;
+    } */
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script>
+    function setup() {
+        createCanvas(640, 640, WEBGL);
+        setAttributes('antialias', true);
+        canvas = document.getElementById('defaultCanvas0');
+        background('#fff');
+        // createDoor({ x: -5, y: -5 }, { x: 5, y: -5 }, { x: 5, y: 5 }, { x: -5, y: 5 });
+        // setTimeout(startCapture, 0)
+        for (var i = 0; i < 40; i++) {
+            var coord = generateCoord(0, 0, 50 + count);
+            // console.log(coord);
+            createDoor(coord[0], coord[1], coord[2], coord[3], i * 20);
+        };
+    }
+
+    var subcount = 0;
+    function createDoor(p1, p2, p3, p4, z) {
+        noFill();
+        translate(.5 , 0, 0);
+        // rotateZ(.01)
+
+        beginShape();
+        // vertex(p1.x, p1.y, z);
+        for (var x = 0; x < 40; x++) {
+            var lastx, lasty;
+            if (x / 10 < 1) {
+                vertex((((x * 10) / 2) - 20), -30 * sin(x) / 5 - 30, z);
+                lastx = ((x * 10) / 2) - 20;
+            }
+            if (x / 10 < 2 && x / 10 >= 1) {
+                vertex((lastx * -cos(x) / 5) + 30, ((x * 10) / 2) - 50, z);
+                lasty = ((x * 10) / 2) - 50;
+            }
+            if (x / 10 < 3 && x / 10 >= 2) {
+                vertex(-((x * 10) / 14), lasty, z);
+                lastx = -((x * 10) / 14);
+            }
+            if (x / 10 < 4 && x / 10 >= 3) {
+                vertex(lastx, -((x * 10) / 13), z);
+            }
+            rotateZ(sin(subcount) / 500);
+            rotateY(-(sin(subcount) / 3000));
+        }
+        // vertex(p2.x, p2.y, z);
+        // vertex(p3.x, p3.y, z);
+        // vertex(p4.x, p4.y, z);
+        endShape(CLOSE);
+
+        // polygon(0, 0, 50, 50, z);
+
+        subcount += .01;
+    }
+
+    function polygon(x, y, radius, npoints, z) {
+        var angle = TWO_PI / npoints;
+        beginShape();
+        for (var a = 0; a < 4; a++) {
+            for (var b = 0; b < 10; b++) {
+
+            }
+        }
+        endShape(CLOSE);
+    }
+
+    function generateCoord(x, y, offset) {
+        var bb = [
+            {
+                x: x - offset,
+                y: y - offset
+            },
+            {
+                x: x + offset,
+                y: y - offset
+            },
+            {
+                x: x + offset,
+                y: y + offset
+            },
+            {
+                x: x - offset,
+                y: y + offset
+            }
+        ];
+
+        return bb;
+    }
+
+    var count = 2;
+    function draw() {
+        // background('#00fdeb');
+        // // rotateX(-70);
+        // // rotateY(100);
+        // // smooth();
+
+        // for (var i = 0; i < 10000 * Math.random(); i++) {
+        //     var coord = generateCoord(0, 0, 50 + count);
+        //     // console.log(coord);
+        //     createDoor(coord[0], coord[1], coord[2], coord[3], i * count);
+        //     rotateZ(sin(count / 5));
+        // };
+
+        // count += .0000001;
+    }
+
+    var capturer = new CCapture({
+        format: 'gif',
+        framerate: 30,
+        workersPath: 'node_modules/ccapture.js/src/',
+        // verbose: true,
+        // motionBlurFrames: 3
+    });
+
+    function startCapture() {
+        time_f = 96;
+        capturer.start();
+        render();
+        setTimeout(function () {
+            capturer.stop();
+            capturer.save();
+        }, 4200);
+    }
+
+    function render() {
+        capturer.capture(canvas);
+        requestAnimationFrame(render);
+    }
+</script>

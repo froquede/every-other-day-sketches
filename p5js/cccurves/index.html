@@ -1,0 +1,119 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<style>
+    /* canvas{
+        width: 640px;
+        height: 640px;
+    } */
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script>
+    var canvas;
+    var rainbow = new Rainbow();
+    var max_frame = 5;
+
+    function setup() {
+        createCanvas(320, 320);
+        canvas = document.getElementById('defaultCanvas0');
+        startCapture();
+    }
+
+    var yoff = 0.0;
+    var count_frame = 1;
+    var saved = false;
+    function draw() {
+        if (stop === false) {
+            background(255, 255, 255, map(255 / count_frame, 255 / max_frame, 255, 0, 255));
+            rotate(radians(45));
+            translate(width / 2, -height / 2)
+
+            if (count_frame >= max_frame) {
+                count_frame = 1;
+            }
+
+            noFill();
+
+            lines(0, .001);
+            lines(0, .00042);
+            lines(50, .01);
+            lines(50, .0042);
+            lines(100, .001);
+            lines(100, .00042);
+            lines(150, .0001);
+            lines(150, .000042);
+            lines(200, .00001);
+            lines(200, .0000042);
+
+            lines(-50, -.01);
+            lines(-50, -.0042);
+            lines(-100, -.001);
+            lines(-100, -.00042);
+            lines(-150, -.0001);
+            lines(-150, -.000042);
+            lines(-200, -.00001);
+            lines(-200, -.000042);
+            count_frame++;
+        }
+        else {
+            if (saved !== true) {
+                capturer.stop();
+                capturer.save();
+                saved = true;
+            }
+        }
+    }
+
+    function lines(offset_y, offset_x) {
+        beginShape();
+        var xoff = 0;
+        for (var x = -(width / 2); x <= width + (width / 2); x += 8) {
+            var y = map(sin(xoff + yoff), 0, 1, height / 2, height / 4);
+
+            stroke('#' + rainbow.colourAt(y / 5));
+
+            vertex(x, y + offset_y);
+            // Increment x dimension for noise
+            xoff += 0.01 + (offset_x * sin(yoff / 120));
+        }
+        // increment y dimension for noise
+        yoff += 0.01;
+        vertex(width, height + 200);
+        vertex(0, height + 200);
+        endShape();
+        // translate(width / 2, height / 2); 
+    }
+
+    var framerate = 24;
+    var motion_blur = 1;
+    var capturer = new CCapture({
+        format: 'gif',
+        framerate: framerate,
+        workersPath: 'node_modules/ccapture.js/src/',
+        // verbose: true,
+        motionBlurFrames: motion_blur
+    });
+
+    var time_stop = 5 * 1000;
+    var total = (time_stop / 1000) * (framerate * (motion_blur));
+    var rendered_count = 0;
+    var stop = false;
+    function startCapture() {
+        rendered_count = 0;
+        capturer.start();
+        render();
+        setTimeout(function () {
+            stop = true;
+        }, time_stop);
+    }
+
+    function render() {
+        if (stop === false) {
+            capturer.capture(canvas);
+            rendered_count++;
+            console.log('Render process: ' + ((rendered_count / total) * 100).toFixed(2) + '%');
+            requestAnimationFrame(render);
+        }
+    }
+</script>
