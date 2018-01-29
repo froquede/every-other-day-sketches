@@ -1,0 +1,114 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<style>
+    /* canvas{
+        width: 640px;
+        height: 640px;
+    } */
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script>
+    var framerate = 24;
+    var motion_blur = 1;
+    var capturer = new CCapture({
+        format: 'gif',
+        framerate: framerate,
+        workersPath: 'node_modules/ccapture.js/src/',
+        // verbose: true,
+        motionBlurFrames: motion_blur
+    });
+
+    var time_stop = 8 * 1000;
+    var total = (time_stop / 1000) * (framerate * (motion_blur));
+    var rendered_count = 0;
+    var stop = false;
+    function startCapture() {
+        rendered_count = 0;
+        capturer.start();
+        render();
+        setTimeout(function () {
+            stop = true;
+        }, time_stop);
+    }
+
+    var saved = false;
+    function render() {
+        if (stop === false) {
+            capturer.capture(canvas);
+            rendered_count++;
+            console.log('Render process: ' + ((rendered_count / total) * 100).toFixed(2) + '%');
+            requestAnimationFrame(render);
+        }
+        else {
+            if (saved !== true) {
+                capturer.stop();
+                capturer.save();
+                saved = true;
+            }
+        }
+    }
+</script>
+
+<script>
+    var points = [];
+    var pal = [
+        'rgba(133, 111, 141, .15)',
+        'rgba(49, 57, 89, .15)',
+        'rgba(231, 232, 98, .15)',
+        'rgba(209, 151, 93, .15)'
+    ];
+
+    var vector_scale = 0.005;
+    var loop_step = 0.1;
+    var magic_multiplier = 0.0015;
+    var time = 0;
+    var iteration_clip = 3;
+
+    function setup() {
+        createCanvas(400, 400);
+        strokeWeight(0.66);
+        background(217, 90, 122);
+        noFill();
+        smooth();
+
+        for (var x = -iteration_clip; x <= iteration_clip; x += loop_step) {
+            for (var y = -iteration_clip; y <= iteration_clip; y += loop_step) {
+                var v = createVector(x + randomGaussian() * magic_multiplier, y + randomGaussian() * magic_multiplier);
+                points.push(v);
+            }
+        }
+
+        startCapture();
+    }
+
+    var count = 10;
+    function draw() {
+        var point_idx = 0;
+        for (var p = 0; p < points.length; p++) {
+            var this_point = points[p];
+            var xx = map(this_point.x, -6.5, 6.5, 0, width);
+            var yy = map(this_point.y, -6.5, 6.5, 0, height);
+
+            var cn = parseInt((100 * pal.length * noise(point_idx)) % pal.length);
+            stroke(pal[cn]);
+            strokeWeight(1);
+            point(xx, yy);
+
+            // var n = TWO_PI * noise(this_point.x, this_point.y);
+            var n = map(noise(this_point.x / 5, this_point.y / 5), 0, 1, -1, 1)
+            // loop_step = n;
+            n = count * n;
+            var v = createVector(cos(n), sin(n));
+
+            this_point.x += vector_scale * v.x;
+            this_point.y += vector_scale * v.y;
+
+            point_idx++;
+        }
+        time += vector_scale / 10;
+
+        count += vector_scale;
+    }
+</script>
