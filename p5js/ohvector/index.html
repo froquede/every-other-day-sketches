@@ -11,9 +11,9 @@
 <script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
 <script>
     var framerate = 24;
-    var motion_blur = 1;
+    var motion_blur = 3;
     var capturer = new CCapture({
-        format: 'gif',
+        format: 'webm',
         framerate: framerate,
         workersPath: 'node_modules/ccapture.js/src/',
         // verbose: true,
@@ -67,7 +67,7 @@
     var iteration_clip = 3;
 
     function setup() {
-        createCanvas(400, 400);
+        createCanvas(720, 720);
         strokeWeight(0.66);
         background(217, 90, 122);
         noFill();

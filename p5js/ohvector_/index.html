@@ -1,0 +1,165 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<style>
+    /* canvas{
+        width: 640px;
+        height: 640px;
+    } */
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script>
+    var framerate = 24;
+    var motion_blur = 3;
+    var capturer = new CCapture({
+        format: 'webm',
+        framerate: framerate,
+        workersPath: 'node_modules/ccapture.js/src/',
+        // verbose: true,
+        motionBlurFrames: motion_blur
+    });
+
+    var time_stop = 8 * 1000;
+    var total = (time_stop / 1000) * (framerate * (motion_blur));
+    var rendered_count = 0;
+    var stop = false;
+    function startCapture() {
+        rendered_count = 0;
+        capturer.start();
+        render();
+        setTimeout(function () {
+            stop = true;
+        }, time_stop);
+    }
+
+    var saved = false;
+    function render() {
+        if (stop === false) {
+            capturer.capture(canvas);
+            rendered_count++;
+            console.log('Render process: ' + ((rendered_count / total) * 100).toFixed(2) + '%');
+            requestAnimationFrame(render);
+        }
+        else {
+            if (saved !== true) {
+                capturer.stop();
+                capturer.save();
+                saved = true;
+            }
+        }
+    }
+</script>
+
+<script>
+    var points = [];
+    var pal = [
+        'rgba(115, 3, 71, ',
+        'rgba(166, 26, 107, ',
+        'rgba(213, 63, 169, ',
+        'rgba(255, 161, 125, ',
+        'rgba(255, 193, 60, ',
+    ];
+
+    var vector_scale = 0.005;
+    var loop_step = 0.1;
+    var magic_multiplier = 0.0015;
+    var time = 0;
+    var iteration_clip = 3;
+    var thickness, opacity, randomX, randomY;
+    var lastx = 0;
+
+    function setup() {
+        createCanvas(720, 720);
+        strokeWeight(0.66);
+        background('#c1b5a9');
+        noFill();
+        smooth();
+        // thickness = random(28, 50);
+        thickness = 100;
+
+        for (var x = 0; x <= width * 2; x += 10) {
+            for (var y = 0; y <= height * 2; y += 10) {
+                var n_ = noise(sin(x), cos(y));
+                point(x * n_, y * n_)
+                stroke(100, 100, 100, random(0, 255 * n_));
+                strokeWeight(randomGaussian() * .9);
+            }
+        }
+
+        var pos = random(20, 50);
+        pos = lastx + pos;
+        lastx = pos;
+        var y_offset = random(height);
+        for (var x = 0; x <= thickness; x += loop_step) {
+            points = [];
+            var pos = random(100, width - 100);
+            var y_offset = random(height);
+            for (var x = 0; x <= thickness; x += loop_step) {
+                var v = createVector(pos + random(10), x + randomGaussian() + y_offset);
+                points.push(v);
+            }
+            count = 0;
+            opacity = random(0, 1);
+            randomX = random(-1, 1);
+            randomY = random(-1, 1);
+        }
+        opacity = random(0, 1);
+        randomX = random(-1, 1);
+        randomY = random(-1, 1);
+
+        // startCapture();
+    }
+
+    var count = 0;
+    function draw() {
+        // console.log(noise(time))
+        // rotate(noise(randomX + randomY) + sin(count * opacity / 50) / 10);
+        rotate(noise(sin(time / PI)));
+        var point_idx = 0;
+        for (var p = 0; p < points.length; p += 2) {
+            var this_point = points[p];
+            // point(this_point.x, this_point.y);
+            // var color = pal[parseInt(p / 10)] || pal[0];
+            // stroke(color);
+            // this_point.x += noise(time + noise(time));
+            // this_point.y += (sin(randomGaussian()) * 4);
+
+            var xx = this_point.x;
+            var yy = this_point.y;
+
+            var cn = parseInt((100 * pal.length * noise(point_idx)) % pal.length);
+            stroke(pal[cn] + opacity + ')');
+            strokeWeight(opacity);
+            point(xx, yy);
+
+            // var n = TWO_PI * noise(this_point.x, this_point.y);
+            var n = map(noise(this_point.x / 5, this_point.y / 5), 0, 1, -1, 1)
+            // loop_step = n;
+            n = n * 2;
+            var v = createVector(cos(n), sin(n * 10));
+
+            this_point.x += (vector_scale * v.x * 100) * 2 * randomX;
+            this_point.y += (vector_scale * v.y * 10) * randomY * randomGaussian() * (opacity * 5);
+            point_idx++;
+        }
+        // console.log(count);
+
+        if (count >= random(opacity * 100, 350)) {
+            // points = [];
+            // var pos = random(100, width - 100);
+            // var y_offset = random(height);
+            // for (var x = 0; x <= thickness; x += loop_step) {
+            //     var v = createVector(pos + random(10), x + randomGaussian() + y_offset);
+            //     points.push(v);
+            // }
+            // count = 0;
+            // opacity = random(0, 1);
+            // randomX = random(-1, 1);
+            // randomY = random(-1, 1);
+        }
+
+        time += vector_scale;
+        count++;
+    }
+</script>
