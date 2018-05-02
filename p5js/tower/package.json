@@ -12,6 +12,7 @@
   "dependencies": {
     "ccapture.js": "^1.0.7",
     "p5": "^0.6.1",
-    "rainbowvis.js": "^1.0.1"
+    "rainbowvis.js": "^1.0.1",
+    "roughjs": "^2.1.2"
   }
 }
