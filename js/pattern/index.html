@@ -1,0 +1,75 @@
+<canvas width="320" height="240"></canvas>
+<script>
+    var canvas = document.getElementsByTagName('canvas')[0];
+    var ctx = canvas.getContext('2d');
+    
+    addImage('./test.png');
+    
+    function getColorIndicesForCoord(x, y, width) {
+        var red = y * (width * 4) + x * 4;
+        return [red, red + 1, red + 2, red + 3];
+    }
+
+    var already_visited = {};
+    
+    function addImage(path){
+        var image = new Image();
+        image.src = path;
+        image.onload = function(){
+            ctx.drawImage(image, 0, 0);
+
+            var red = 0;
+            var green = 0;
+            var blue = 0;
+
+            for(var x = 0; x < 320; x++){
+                for(var y = 0; y < 240; y++){
+                    var pixel = ctx.getImageData(x, y, 1, 1).data;
+                    
+                    red += +pixel[0];
+                    green += +pixel[1];
+                    blue += +pixel[2];
+                }
+            }
+
+            var total = 320 * 240;
+            red = (red / total).toFixed(0);
+            green = (green / total).toFixed(0);
+            blue = (blue / total).toFixed(0);
+            var med = red + green + blue;
+
+            for(var x = 0; x < 320; x++){
+                for(var y = 0; y < 240; y++){
+                    var pixel = ctx.getImageData(x, y, 1, 1).data;
+                    
+                    var r = +pixel[0];
+                    var g = +pixel[1];
+                    var b = +pixel[2];
+
+                    if((r + b + g) >= med){
+                        checkNeighbours((r + b + g), x, y, []);
+                    }
+                }
+            }
+        }
+        
+        function checkNeighbours(pt, x, y){
+            if(x > 0 && x < 320 && y > 0 && y < 240){
+                checkAllCorners(pt, x, y); 
+            }
+            else{
+
+            }
+        }
+
+        function checkAllCorners(pt, x, y){
+            var total = ctx.getImageData(x + 1, y, 1, 1).data;
+            var r = +total[0];
+            var g = +total[1];
+            var b = +total[2];
+            if()
+        }
+
+        return image;
+    }
+</script>

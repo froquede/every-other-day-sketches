@@ -15,20 +15,20 @@
 	var rainbow = new Rainbow();
 	var max_frame = 5;
 	var rc;
-	
+
 	function setup() {
 		var res = 480;
-		createCanvas(res, res);
+		createCanvas(540, 960);
 		canvas = document.getElementById('defaultCanvas0');
 		// rc = rough.canvas(document.getElementById('defaultCanvas0'));
 		startCapture();
-		
-		radius = width / 5;
+
+		radius = width / 2;
 		circle_precision = width / 5;
 		c_limit = 19;
-		padding_h = Math.floor(height/35)
+		padding_h = Math.floor(height / 35)
 	}
-	
+
 	var r_circles;
 	var circles = [];
 	var c_limit = (40);
@@ -36,46 +36,48 @@
 	var padding_h;
 	var radius;
 	var circle_precision;
-	var main_color = 200;
+	var main_color = 160;
 	var main_bg = 10;
-	
+
 	function draw() {
 		smooth();
 		background(main_bg);
-		
-		circles.push(createCircle({ x: width/2, y: width / 2 - width / 20 }, radius, circle_precision));
+
+		circles.push(createCircle({ x: width / 2, y: height / 2 - height / 20 }, radius, circle_precision));
 		if (circles.length > c_limit) {
 			circles.shift();
 		}
-		
+
 		r_circles = JSON.parse(JSON.stringify(circles));
 		r_circles.reverse();
 		for (var r = 0; r < r_circles.length; r++) {
 			var _circle = r_circles[r];
 			_circle.reverse();
-			
+
 			for (var p = 0; p < _circle.length; p++) {
 				var _point = _circle[p];
 				var n_point = _circle[p + 1];
 				if (!n_point) {
 					n_point = _circle[0];
 				}
-				
+				// n_point.x = (n_point.x + _point.x) / 2;
+				// n_point.y = (n_point.y + _point.y) / 2;
+
 				var opacity = ((1 - ((r) / (r_circles.length)))).toFixed(10);
 				var rgb = (opacity * main_color).toFixed(0);
 				// console.log(opacity);
 				var op_color = 'rgba(' + rgb + ', ' + rgb + ',' + rgb + ',' + opacity + ')';
-				
+
 				strokeWeight((height / 250) * opacity);
 				stroke(op_color);
 				var actual_line = line(
-				_point.x, _point.y + r * padding_h,
-				n_point.x, n_point.y + r * padding_h
+					_point.x, _point.y + r * padding_h,
+					n_point.x, n_point.y + r * padding_h
 				);
 			}
-			
+
 		}
-		
+
 		var _circle = r_circles[0];
 		fill(main_color);
 		noStroke();
@@ -84,50 +86,52 @@
 		vertex(0, 0);
 		vertex(width, 0);
 		vertex(width, _circle[0].y);
-		
+
 		for (var c = 0; c < _circle.length; c++) {
 			var __point = _circle[c];
 			vertex(__point.x, __point.y);
-			
-			if(!_circle[c + 1]){
+
+			if (!_circle[c + 1]) {
 				vertex(_circle[0].x, _circle[0].y);
 			}
 		}
-		
+
 		vertex(width, _circle[0].y);
 		vertex(width, height);
 		vertex(0, height);
 		endShape(CLOSE);
-		
-		time += 2 / 60;
+
+		time += .20 / 60;
 	}
-	
+
 	function createCircle(center, radius, precision) {
 		var coordinates = [];
 		var middle = precision / 2;
-		
+
 		for (var i = 0; i < precision; i++) {
 			var angle = (i / (precision / 2)) * PI;
-			var n = noise((i * HALF_PI + (time * 8)) / (precision / 1.6));
-			var x = center.x + (radius * Math.cos(angle)) * (((n * HALF_PI) / 1.2) * 2);
-			var y = center.y + (radius * Math.sin(angle)) * (n * 2);
+			var angle_mod = ((i * HALF_PI + (time * 8)) / (precision / 2)) / 10000;
+			var n = map(noise(angle_mod + 1 * (i / 30), angle_mod + 1, time), 0.0, 1.0, 0, 1.0);
 			
+			var x = center.x + (radius * Math.cos(angle) * n);
+			var y = center.y + (radius * Math.sin(angle) * n);
+
 			coordinates.push({ x: x, y: y });
 		}
 		return coordinates;
 	}
-	
+
 	var framerate = 24;
 	var motion_blur = 1;
 	var capturer = new CCapture({
-		format: 'gif',
+		format: 'webm',
 		framerate: framerate,
 		workersPath: 'node_modules/ccapture.js/src/',
 		// verbose: true,
 		motionBlurFrames: motion_blur
 	});
-	
-	var time_stop = 6 * 1000;
+
+	var time_stop = 10 * 1000;
 	var total = (time_stop / 1000) * (framerate * (motion_blur));
 	var rendered_count = 0;
 	var stop = false;
@@ -145,7 +149,7 @@
 			}
 		}, time_stop);
 	}
-	
+
 	function render() {
 		if (stop === false) {
 			capturer.capture(canvas);

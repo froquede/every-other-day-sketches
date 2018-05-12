@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>tracking.js - color with video</title>
+  <!-- <link rel="stylesheet" href="assets/demo.css"> -->
+  
+  <script src="../build/tracking.js"></script>
+  <!-- <script src="../node_modules/dat.gui/build/dat.gui.min.js"></script> -->
+  <!-- <script src="assets/stats.min.js"></script> -->
+  <!-- <script src="assets/color_camera_gui.js"></script> -->
+  
+  <style>
+    .demo-container {
+      /* background-color: black; */
+      position: relative;
+    }
+    
+    canvas{
+      top: 0px;
+      left: 0px;
+      z-index: 1000;
+    }
+    
+    video, canvas {
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-title">
+    <p><a href="http://trackingjs.com" target="_parent">tracking.js</a> － detect certain colors in a video</p>
+  </div>
+  
+  <div class="demo-frame">
+    <div class="demo-container">
+      <!-- <img src="http://localhost:3000/frame" id="video"></img> -->
+      <video id="video" width="640" height="480" preload autoplay loop muted></video>
+      <canvas id="canvas" width="640" height="480"></canvas>
+    </div>
+  </div>
+  
+  <script>
+    window.onload = function() {
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+      tracking.ColorTracker.registerColor('fingersinlight', function(r, g, b) {
+        if (r >= 154 && r <= 174) {
+          if(g >= 108 && g <= 128){
+            if(b >= 69 && b <= 89){
+              return true;
+            } 
+          }
+        }
+        return false;
+      });
+
+      var tracker = new tracking.ColorTracker(['fingersinlight']);
+      tracker.setMinDimension(10);
+      // tracking.track('#video', tracker);
+      tracking.track('#video', tracker, { camera: true });
+      tracker.on('track', function(event) {
+        // console.log(event.data)
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        
+        event.data.forEach(function(rect) {
+          context.strokeStyle = "rgb('255, 225, 184')";
+          context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+          context.font = '11px Helvetica';
+          context.fillStyle = "#fff";
+          context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+          context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+        });
+      });
+      
+      // setInterval(function(){
+        
+        //   tracking.track('#video', tracker);
+        // }, 500);
+        
+        // initGUIControllers(tracker);
+      };
+    </script>
+    
+  </body>
+  </html>
+  

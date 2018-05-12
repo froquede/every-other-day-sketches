@@ -1,0 +1,159 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<script src="node_modules/jquery/dist/jquery.js"></script>
+<style>
+	canvas{
+		width: 640px !important;
+		height: 480px !important;
+	}
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script src="node_modules/roughjs/dist/rough.min.js"></script>
+<script>
+    var canvas;
+	var max_frame = 5;
+    var rc;
+    var time = 0;
+    var modi;
+    var points = [];
+
+    p5.disableFriendlyErrors = true;
+	
+	function setup() {
+        createCanvas(640 / 1, 480 / 1);
+        noStroke();
+		canvas = document.getElementById('defaultCanvas0');
+		context = canvas.getContext('2d');
+		base_image = new Image();
+		base_image.onload = function(){
+            console.time('calc');
+            context.drawImage(base_image, 0, 0, width, height);
+            var imgdata = context.getImageData(0,0, width, height);
+            background(255);
+            points = [];
+
+            let l = imgdata.data.length / 4;
+
+            for (let i = 0; i < l; i++) {
+                let r = imgdata.data[i * 4 + 0];
+                let g = imgdata.data[i * 4 + 1];
+                let b = imgdata.data[i * 4 + 2];
+                
+                var y = floor(i / width);
+                var x = i - (width * y);
+                var size = Math.ceil(((r + g + b) / 120));
+                points.push({x: x - size / 2, y: y - size / 2, size: size, color: color(r, g, b)});
+            }
+            
+            // for(var x = 0; x < width; x++){
+            //     for(var y = 0; y < height; y++){
+            //         var a = y * (width * 4) + x * 4;
+            //         var _color = [
+            //             imgdata.data[a],
+            //             imgdata.data[a + 1],
+            //             imgdata.data[a + 2]
+            //         ];
+
+            //         var size = (_color[0] + _color[1] + _color[2]) / modi;
+
+            //         if(size < 0){
+            //             size *= -1;
+            //         }
+
+            //     }    
+            // }
+            console.timeEnd('calc');
+
+            // console.log('end');
+            // context.putImageData(imgdata,0,0);
+
+			window.requestAnimationFrame(loop);
+		}
+		// startCapture();
+	}
+	
+	function draw() {
+		// smooth();
+        console.time('render');
+        // background(255);
+        for(var p = 0; p < points.length; p++){
+            // var point = points[p];
+            time += 0.01;
+            fill(points[p].color);
+            ellipse(points[p].x, points[p].y, points[p].size * (2 + noise(time)));
+        }
+        console.timeEnd('render');
+
+        base_image.src = 'http://localhost:3000/frame?time=';
+        time += 0.01;
+        modi = (40 * noise(time));
+		noLoop();
+		// background(main_bg);
+		// $.get('http://192.168.15.3:8080/video', function(res){
+			//     res = res[0];
+			//     var imgdatalen = res.length;
+			
+			//     for(var i = 0; i < 640; i++){
+				// 		for(var n = 0; n < 480; n++){
+					// 			// console.log(res[(n * 640) + i]);
+					// 			var pos = (n * 640) + i;
+					// 			fill(res[pos].r, res[pos].g, res[pos].b);
+					// 			stroke(res[pos].r, res[pos].g, res[pos].b);
+					// 			var size = (res[pos].r + res[pos].g + res[pos].b) / (785 / 20);
+					// 			if(size > 10){
+						// 				size = 10;
+						// 			}
+						// 			if(size < 0){
+							// 				size *= -1;
+							// 			}
+							
+							// 			size = ceil(size);
+							
+							// 			ellipse(i - (size / 2), n - (size / 2), size);
+							// 		}
+							//     }
+							
+							// 	// loop();
+							// });
+						}
+						
+						var framerate = 24;
+						var motion_blur = 1;
+						var capturer = new CCapture({
+							format: 'webm',
+							framerate: framerate,
+							workersPath: 'node_modules/ccapture.js/src/',
+							// verbose: true,
+							motionBlurFrames: motion_blur
+						});
+						
+						var time_stop = 10 * 1000;
+						var total = (time_stop / 1000) * (framerate * (motion_blur));
+						var rendered_count = 0;
+						var stop = false;
+						var saved = false;
+						function startCapture() {
+							rendered_count = 0;
+							capturer.start();
+							render();
+							setTimeout(function () {
+								stop = true;
+								if (saved !== true) {
+									capturer.stop();
+									capturer.save();
+									saved = true;
+								}
+							}, time_stop);
+						}
+						
+						function render() {
+							if (stop === false) {
+								capturer.capture(canvas);
+								rendered_count++;
+								console.log('Render process: ' + ((rendered_count / total) * 100).toFixed(2) + '%');
+								requestAnimationFrame(render);
+							}
+						}
+					</script>

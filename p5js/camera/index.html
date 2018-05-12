@@ -1,0 +1,115 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<script src="node_modules/jquery/dist/jquery.js"></script>
+<style>
+	/* canvas{
+		width: 640px;
+		height: 640px;
+	} */
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script src="node_modules/roughjs/dist/rough.min.js"></script>
+<script>
+	var canvas;
+	var max_frame = 5;
+	var rc;
+	
+	function setup() {
+		var res = 480;
+		createCanvas(640, 480);
+		canvas = document.getElementById('defaultCanvas0');
+		context = canvas.getContext('2d');
+		base_image = new Image();
+		base_image.onload = function(){
+			context.drawImage(base_image, 0, 0);
+
+			var imgdata = context.getImageData(0,0, 640, 480);
+            var imgdatalen = imgdata / 4;
+            
+            for(var i=0;i<imgdatalen;i++){  //iterate over every pixel in the canvas
+                // imgdata.data[4*i] = res[i].r;    // RED (0-255)
+                // imgdata.data[4*i+1] = res[i].g; // GREEN (0-255)
+                // imgdata.data[4*i+2] = res[i].b;   // BLUE (0-255)
+                // imgdata.data[4*i+3] = 255;  // APLHA (0-255)
+            }
+            ctx.putImageData(imgdata,0,0);
+
+			window.requestAnimationFrame(loop);
+		}
+		// startCapture();
+	}
+	
+	function draw() {
+		smooth();
+
+		base_image.src = 'http://localhost:3000/frame?time=' + +(new Date());
+		noLoop();
+		// background(main_bg);
+		// $.get('http://192.168.15.3:8080/video', function(res){
+			//     res = res[0];
+			//     var imgdatalen = res.length;
+			
+			//     for(var i = 0; i < 640; i++){
+				// 		for(var n = 0; n < 480; n++){
+					// 			// console.log(res[(n * 640) + i]);
+					// 			var pos = (n * 640) + i;
+					// 			fill(res[pos].r, res[pos].g, res[pos].b);
+					// 			stroke(res[pos].r, res[pos].g, res[pos].b);
+					// 			var size = (res[pos].r + res[pos].g + res[pos].b) / (785 / 20);
+					// 			if(size > 10){
+						// 				size = 10;
+						// 			}
+						// 			if(size < 0){
+							// 				size *= -1;
+							// 			}
+							
+							// 			size = ceil(size);
+							
+							// 			ellipse(i - (size / 2), n - (size / 2), size);
+							// 		}
+							//     }
+							
+							// 	// loop();
+							// });
+						}
+						
+						var framerate = 24;
+						var motion_blur = 1;
+						var capturer = new CCapture({
+							format: 'webm',
+							framerate: framerate,
+							workersPath: 'node_modules/ccapture.js/src/',
+							// verbose: true,
+							motionBlurFrames: motion_blur
+						});
+						
+						var time_stop = 10 * 1000;
+						var total = (time_stop / 1000) * (framerate * (motion_blur));
+						var rendered_count = 0;
+						var stop = false;
+						var saved = false;
+						function startCapture() {
+							rendered_count = 0;
+							capturer.start();
+							render();
+							setTimeout(function () {
+								stop = true;
+								if (saved !== true) {
+									capturer.stop();
+									capturer.save();
+									saved = true;
+								}
+							}, time_stop);
+						}
+						
+						function render() {
+							if (stop === false) {
+								capturer.capture(canvas);
+								rendered_count++;
+								console.log('Render process: ' + ((rendered_count / total) * 100).toFixed(2) + '%');
+								requestAnimationFrame(render);
+							}
+						}
+					</script>
