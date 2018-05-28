@@ -1,0 +1,47 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<style>
+	/* canvas{
+		width: 640px;
+		height: 640px;
+	} */
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script src="renderer.js"></script>
+<script src="node_modules/roughjs/dist/rough.min.js"></script>
+<script>
+	var canvas;
+	var WIDHT = 500, HEIGHT = 500;
+	var camera_distance = 540;
+
+	function setup() {
+		createCanvas(WIDHT, HEIGHT, WEBGL);
+		canvas = document.getElementById('defaultCanvas0');
+		ortho(-camera_distance, camera_distance, camera_distance, -camera_distance, -1000, 1000);
+		// startCapture();
+	}
+
+	var time = 0;
+	function draw() {
+		createGrid(20, 20);
+	}
+
+	function createGrid(distance, count) {
+		var grid = [];
+		push();
+		// rotate(HALF_PI / 2);
+		for (var x = 0; x < count; x++) {
+			var line = [];
+			for (var y = 0; y < count; y++) {
+				line.push([x * distance, y * distance]);
+				
+				strokeWeight(5);
+				box(x * distance, y * distance, 1);
+			}
+			grid.push(line);
+		}
+		pop();
+	}
+</script>

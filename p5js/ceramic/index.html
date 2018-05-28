@@ -1,0 +1,112 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<style>
+	/* canvas{
+		width: 640px;
+		height: 640px;
+	} */
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script src="node_modules/roughjs/dist/rough.min.js"></script>
+<script>
+	var brush_threads = 10;
+	var time = 0;
+
+	function preload() {
+
+	}
+
+	function setup() {
+		createCanvas(1200, 400);
+		noLoop();
+		background(20);
+		angleMode(DEGREES);
+	}
+
+	var _sin_ = 1;
+	var padding = 15;
+
+	function draw() {
+		time++;
+		for (var i = 0; i < 20; i++) {
+			for (var j = 0; j < 30; j++) {
+				brush(i, j, _sin_);
+			}
+			last_length = 0;
+			last_height += brush_threads + padding;
+		}
+	}
+
+	var last_length = -50, last_height = -150;
+	last_sin = 0;
+	function brush(_x, _y, _sin_) {
+		push();
+
+		var pos_x = last_length;
+		var pos_y = last_height;
+		var length = random(12, 65);
+
+		translate(pos_x, pos_y);
+		var this_sin = (sin(_y * 10) * 20);
+		rotate(this_sin);
+		console.log(_x, _y, pos_x, pos_y);
+
+		for (var y = 0; y < brush_threads; y++) {
+			for (var x = 0; x < length; x++) {
+				if (y >= brush_threads / 6 && y <= brush_threads - (brush_threads / 6)) {
+					var w = randomGaussian(cos(x * y));
+					var c = color('rgba(255,255,255,' + w + ')');
+					noFill();
+					stroke(c);
+					strokeWeight(w);
+					point(pos_x + x, y + pos_y);
+				}
+
+			}
+		}
+
+		last_length += length + padding / 2;
+
+		pop();
+	}
+
+	var framerate = 24;
+	var motion_blur = 1;
+	var capturer = new CCapture({
+		format: 'webm',
+		framerate: framerate,
+		workersPath: 'node_modules/ccapture.js/src/',
+		// verbose: true,
+		motionBlurFrames: motion_blur
+	});
+
+	var time_stop = 10 * 1000;
+	var total = (time_stop / 1000) * (framerate * (motion_blur));
+	var rendered_count = 0;
+	var stop = false;
+	var saved = false;
+	function startCapture() {
+		rendered_count = 0;
+		capturer.start();
+		render();
+		setTimeout(function () {
+			stop = true;
+			if (saved !== true) {
+				capturer.stop();
+				capturer.save();
+				saved = true;
+			}
+		}, time_stop);
+	}
+
+	function render() {
+		if (stop === false) {
+			capturer.capture(canvas);
+			rendered_count++;
+			console.log('Render process: ' + ((rendered_count / total) * 100).toFixed(2) + '%');
+			requestAnimationFrame(render);
+		}
+	}
+</script>
