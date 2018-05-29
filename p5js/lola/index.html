@@ -1,0 +1,88 @@
+<script src="node_modules/p5/lib/p5.js"></script>
+<script src="node_modules/rainbowvis.js/rainbowvis.js"></script>
+<style>
+	/* canvas{
+		width: 640px;
+		height: 640px;
+	} */
+
+	body {
+		margin: 0;
+	}
+</style>
+
+<body></body>
+<script src="node_modules/ccapture.js/build/CCapture.all.min.js"></script>
+<script src="renderer.js"></script>
+<script src="node_modules/roughjs/dist/rough.min.js"></script>
+<script src="notes.js"></script>
+<script>
+	var canvas;
+	var WIDTH = window.innerWidth, HEIGHT = window.innerHeight;
+
+	function setup() {
+		createCanvas(WIDTH, HEIGHT);
+		canvas = document.getElementById('defaultCanvas0');
+		strokeWeight(20);
+		// startCapture();
+	}
+
+	var time = 0;
+	var start = notes['C0'];
+	var end = notes['A5'];
+	var diff = end - start;
+
+	function draw() {
+		smooth();
+		var diff_t = (time * 100) / end;
+		var size = (diff_t / 100) * WIDTH;
+		strokeWeight(size);
+		point(WIDTH / 2, HEIGHT / 2);
+		if(size > WIDTH + (WIDTH / 5)){
+			noLoop();
+			clearTimeout(notes_timeout);
+			setTimeout(function(){
+				background(255);
+				time = 0;
+				multiplier -= multiplier / 4;
+				playNotePause(0);
+				loop();
+			}, 5000 * multiplier);
+		}
+	}
+
+	var multiplier = 1;
+	var audioContext = new AudioContext();
+	function playFrequency(frequency) {
+		var sampleRate = audioContext.sampleRate;
+		var duration = (2 * multiplier) * sampleRate;
+		var numChannels = 1;
+		var buffer = audioContext.createBuffer(numChannels, duration, sampleRate);
+		var channelData = buffer.getChannelData(0);
+		for (var i = 0; i < sampleRate; i++) {
+			channelData[i] = Math.sin(2 * Math.PI * frequency * i / (sampleRate));
+		}
+
+		// create audio source node.
+		var source = audioContext.createBufferSource();
+		source.buffer = buffer;
+		source.connect(audioContext.destination);
+
+		// finally start to play
+		source.start(0);
+	}
+
+	var keys = Object.keys(notes);
+	var notes_timeout;
+	function playNotePause(count) {
+		if (keys[count]) {
+			var f = notes[keys[count]];
+			playFrequency(f);
+			count++;
+			notes_timeout = setTimeout(playNotePause, 800 * multiplier, count);
+			time = f;
+		}
+	}
+
+	playNotePause(0);
+</script>
