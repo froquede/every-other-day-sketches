@@ -29,7 +29,7 @@
 
 	var time = 0;
 	var start = notes['C0'];
-	var end = notes['A5'];
+	var end = notes['A4'];
 	var diff = end - start;
 
 	function draw() {
@@ -41,6 +41,7 @@
 		if(size > WIDTH + (WIDTH / 5)){
 			noLoop();
 			clearTimeout(notes_timeout);
+			playFrequency(432, 5 * multiplier);
 			setTimeout(function(){
 				background(255);
 				time = 0;
@@ -53,9 +54,9 @@
 
 	var multiplier = 1;
 	var audioContext = new AudioContext();
-	function playFrequency(frequency) {
+	function playFrequency(frequency, time) {
 		var sampleRate = audioContext.sampleRate;
-		var duration = (2 * multiplier) * sampleRate;
+		var duration = ((time || 2) * multiplier) * sampleRate;
 		var numChannels = 1;
 		var buffer = audioContext.createBuffer(numChannels, duration, sampleRate);
 		var channelData = buffer.getChannelData(0);
