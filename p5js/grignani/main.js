@@ -12,15 +12,16 @@ function setup() {
     capture(canvas);
 }
 
-var time = 0, anim_count = 0;
+var time = Math.random(), anim_count = 0;
 var multiplier = 1.6;
 var LINES = 60;
 function draw() {
     translate(0, -150 * multiplier);
     rotate(22);
     for (var x = 0; x < LINES; x++) {
-        var vx = x * (WIDHT * multiplier) / LINES;
-        if (vx / 2 < random_pos - LINES || vx / 2 > random_pos + (WIDHT * multiplier) / LINES) {
+        var vw = (WIDHT * multiplier * 1.1) / LINES
+        var vx = x * vw;
+        if (vx / 2 < random_pos - LINES || vx / 2 > random_pos + vw) {
             if (x >= random_color_line - 2 && x <= random_color_line + 2) {
                 strokeWeight(WIDHT * 1.2 / LINES);
                 stroke(255, 0, 0);
