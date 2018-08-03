@@ -1,4 +1,4 @@
-# daily-sketches
+# every-other-day-sketches
 canvas / webgl / p5.js daily? sketches
 </br>
 <a href="https://rfsdalotto.github.io/">more</a>
