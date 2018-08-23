@@ -1,7 +1,7 @@
 # every-other-day-sketches
-canvas / webgl / p5.js daily? sketches
+canvas / webgl / p5.js / aframe / threejs / ... every other day sketches
 </br>
-<a href="https://rfsdalotto.github.io/">more</a>
+<a href="https://roquef.github.io/">more</a>
 </br>
 
 <p>
