@@ -1,6 +1,6 @@
 var framerate = 24;
 var motion_blur = 2;
-var time_stop = 20 * 1000;
+var time_stop = 15 * 1000;
 var total = (time_stop / 1000) * (framerate * (motion_blur));
 var rendered_count = 0;
 var stop = false;
@@ -44,7 +44,7 @@ function padZero(t, l) {
     return ('0' + t).slice(-l || -2);
 }
 
-function capture(canvas) {
+function capture() {
     var capturer = new CCapture({
         format: 'webm',
         framerate: framerate,
