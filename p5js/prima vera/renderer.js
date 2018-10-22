@@ -48,7 +48,7 @@ function capture(canvas) {
     var capturer = new CCapture({
         format: 'webm',
         framerate: framerate,
-        workersPath: 'node_modules/ccapture.js/src/',
+        workersPath: '../node_modules/ccapture.js/src/',
         motionBlurFrames: motion_blur,
         name: window.document.title + getDateFormated(),
         // display: true,
