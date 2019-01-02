@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+</body>
+<script>
+    var canvas, ctx;
+    var time = 0;
+
+    function init() {
+        canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 600;
+        document.body.appendChild(canvas);
+        ctx = canvas.getContext('2d');
+
+        draw();
+    }
+
+    function draw() {
+        var magnificationFactor = 200;
+        var panX = 2;
+        var panY = 1.4;
+        for (var x = 0; x < canvas.width; x++) {
+            for (var y = 0; y < canvas.height; y++) {
+                var belongsToSet =
+                    checkIfBelongsToMandelbrotSet(x / magnificationFactor - panX,
+                        y / magnificationFactor - panY);
+                if (belongsToSet) {
+                    ctx.fillRect(x, y, 1, 1); // Draw a black pixel
+                }
+            }
+        }
+
+        time += 0.1;
+        setTimeout(draw, 0)
+    }
+
+    function checkIfBelongsToMandelbrotSet(x, y) {
+        var realComponentOfResult = x;
+        var imaginaryComponentOfResult = y;
+
+        for (var i = 0; i < 30; i++) {
+            // Calculate the real and imaginary components of the result
+            // separately
+            var tempRealComponent = realComponentOfResult * realComponentOfResult
+                - imaginaryComponentOfResult * imaginaryComponentOfResult
+                + x;
+
+            var tempImaginaryComponent = 2 * realComponentOfResult * imaginaryComponentOfResult
+                + y;
+
+            realComponentOfResult = tempRealComponent;
+            imaginaryComponentOfResult = tempImaginaryComponent;
+        }
+
+        if (realComponentOfResult * imaginaryComponentOfResult < time * Math.sin(time))
+            return true; // In the Mandelbrot set
+
+        return false;
+    }
+
+    init();
+</script>
+
+</html>
