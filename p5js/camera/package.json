@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "ccapture.js": "^1.0.7",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.0",
     "p5": "^0.6.1",
     "rainbowvis.js": "^1.0.1",
     "roughjs": "^2.1.2"
