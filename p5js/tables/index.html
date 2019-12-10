@@ -1,0 +1,94 @@
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<script src="node_modules/p5/lib/p5.js"></script>
+<style>
+    canvas {
+        width: 1920px;
+        height: 1080px;
+    }
+
+    body,
+    html {
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<html>
+
+<body>
+    <button onclick="init()" id="hide">start</button>
+</body>
+
+</html>
+<script>
+    let radius = 450
+    let npoints = 70
+    let nangle = 360 / npoints
+    let multiplier = parseInt(Math.random() * 100);
+    let middlex, middley;
+    let fader = 200;
+    var canvas;
+    let song;
+    let ctx;
+    var p;
+
+    let sketch = function (p) {
+        p.setup = function () {
+            p.userStartAudio().then(function () {
+                // myDiv.remove();
+                song = new p5.AudioIn();
+                canvas = p.createCanvas(1920, 1080);
+                ctx = canvas.canvas.getContext('2d');
+                middlex = canvas.width / 2, middley = canvas.height / 2;
+                p.noFill();
+                p.stroke(240);
+                song.start();
+            });
+        }
+
+        let last_rms = 0;
+        p.draw = function () {
+            let rms = song.getLevel();
+            let c = last_rms - rms;
+            c = c < 0 ? c * -1 : c
+
+            p.background('rgba(20,20,20,.33)');
+
+            for (let i = 0; i < npoints; i++) {
+                let ni = nangle * i
+                let x = middlex + radius * p.sin(ni * Math.PI / 360);
+                let y = middley + radius * p.cos(ni * Math.PI / 360);
+                // point(x,y);
+                p.translate(0, 10 / multiplier);
+                drawMultiplierLine({ x, y }, i, c);
+            }
+
+            multiplier += .002 + (c / 40)
+            last_rms = rms;
+            radius = 400 + (100 * rms)
+            npoints = 100 + rms * 100;
+        }
+
+        function drawMultiplierLine(coords, i, c) {
+            let mn = nangle * (i * multiplier)
+            let x = middlex + radius * p.sin(mn * Math.PI / 180);
+            let y = middley + radius * p.cos(mn * Math.PI / 180);
+            p.strokeWeight((i * 4 + multiplier / 50 + multiplier) / (song.getLevel() * 1000));
+            // p.line(coords.x, coords.y, x, y);
+
+            let mn2 = nangle * ((i * multiplier) + multiplier / 1.9)
+            let mn3 = nangle * ((i * multiplier) + multiplier / 2.3)
+            p.bezier(coords.x, coords.y, x, y,
+                middlex + radius * p.sin(mn3 * Math.PI / 180), middley + radius * p.cos(mn3 * Math.PI / 180),
+                middlex + radius * p.sin(mn2 * Math.PI / 180), middley + radius * p.cos(mn2 * Math.PI / 180))
+        }
+    };
+
+    function init() {
+        // song = new p5.AudioIn();
+        let myp5 = new p5(sketch);
+        var elem = document.querySelector('#hide');
+        elem.style.display = 'none';
+        document.documentElement.requestFullscreen()
+    }
+</script>
+<script src="https://cdn.JsDelivr.net/npm/p5/lib/addons/p5.sound.min.js"></script>
