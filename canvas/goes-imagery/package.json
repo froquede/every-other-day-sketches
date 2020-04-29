@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "ccapture.js": "^1.0.7",
-    "jquery": "^3.2.1",
+    "jquery": "^3.5.0",
     "moment": "^2.20.1"
   }
 }
