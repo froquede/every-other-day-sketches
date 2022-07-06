@@ -11,6 +11,6 @@
   "dependencies": {
     "ccapture.js": "^1.0.7",
     "jquery": "^3.2.1",
-    "moment": "^2.20.1"
+    "moment": "^2.29.4"
   }
 }
